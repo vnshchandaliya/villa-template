@@ -1,0 +1,15 @@
+@import "tailwindcss";
+@import '@fontsource/raleway/300.css';
+@import '@fontsource/raleway/400.css';
+@import '@fontsource/raleway/700.css';
+
+/* Add this to your src/index.css file */
+
+.font-serif-custom-heading {
+  font-family: 'Font Name Here', serif;
+}
+
+.font-serif-subheading {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+}
