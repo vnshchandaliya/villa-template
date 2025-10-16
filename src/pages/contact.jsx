@@ -1,281 +1,302 @@
 import React, { useState } from 'react';
-import { IoLocationOutline } from "react-icons/io5";
-import { MdLocalPhone } from "react-icons/md";
 
-// The main App component for the contact form.
-const Contact = () => {
-    // State to hold the form data.
-    const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
-        email: '',
-        mobilePhone: '',
-        homeAddress: '',
-        comments: '',
-        dogCount: 0,
-    });
-    // State to hold the form submission status or error messages.
-    const [status, setStatus] = useState('');
 
-    // Handle input changes for all form fields.
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prevState => ({
-            ...prevState,
-            [name]: value,
-        }));
-    };
+const servicesList = [
+  "Tour Packages",
+  "Hotel Bookings",
+  "Flight Bookings",
+  "Visa Assistance",
+  "Visa Filling",
+  "Insurance Services",
+  "Appointment Booking",
+  "Okay to Board",
+  "Itinerary Tickets",
+  "Attestation & Appostile Services"
+];
 
-    // Handle form submission.
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        // Simple validation check for demonstration.
-        if (formData.firstName.trim() === '' || formData.email.trim() === '') {
-            setStatus('Please fill out all required fields.');
-            return;
+const countries = [
+  "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan",
+  "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Brazil", "Brunei", "Bulgaria", "Cambodia", "Canada", "Chile", "China", "Colombia", "Comoros", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Estonia", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia", "Rwanda", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Korea", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
+];
+
+const ContactForm = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    mobile: '',
+    email: '',
+    
+    selectedService: '', 
+    destination: '',
+    startDate: '',
+    endDate: '',
+    adults: 1,
+    children: 0,
+    hotelCategory: '',
+    message: ''
+  });
+
+  const [showThankYouModal, setShowThankYouModal] = useState(false);
+
+
+  const googleSheetUrl = "https://script.google.com/macros/s/AKfycbwJqQcgpRCj0ptODnmKw-m7Vp1DbqRaGY8Ypk4__58mGD1kwnMTUt5HBuSZiz-YnILo8w/exec";
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
+  };
+  
+   // const handleServiceChange = (e) => {
+  //   setFormData(prevState => ({
+  //     ...prevState,
+  //     serviceType: e.target.value
+  //   }));
+  // };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const dataToSend = new FormData();
+    
+    
+    dataToSend.append('formType', 'General Form'); 
+
+    dataToSend.append('Your Name', formData.name);
+    dataToSend.append('Mobile No', formData.mobile);
+    dataToSend.append('Email ID', formData.email);
+    dataToSend.append('Type of Services', formData.selectedService);
+    dataToSend.append('Destination', formData.destination);
+    dataToSend.append('Start Date', formData.startDate);
+    dataToSend.append('End Date', formData.endDate);
+    dataToSend.append('Number of People', `Adults: ${formData.adults}, Children: ${formData.children}`);
+    dataToSend.append('Hotel Category', formData.hotelCategory);
+    dataToSend.append('Message', formData.message);
+    dataToSend.append('Timestamp', new Date().toLocaleString());
+
+    try {
+        const response = await fetch(googleSheetUrl, {
+            method: 'POST',
+            body: dataToSend,
+        });
+
+        if (response.ok) {
+            setShowThankYouModal(true);
+            setTimeout(() => {
+                setShowThankYouModal(false);
+                window.location.href = '/'; 
+            }, 3000); 
+        } else {
+            const result = await response.text();
+            console.error('Submission failed:', result);
+            
         }
-        // Log the form data to the console for demonstration purposes.
-        console.log('Form Submitted:', formData);
-        setStatus('Form submitted successfully!');
+    } catch (error) {
+        console.error("Error submitting form:", error);
         
-        // Reset the form after a short delay for a better user experience.
-        setTimeout(() => {
-            setFormData({
-                firstName: '',
-                lastName: '',
-                email: '',
-                mobilePhone: '',
-                homeAddress: '',
-                comments: '',
-                dogCount: 0,
-            });
-            setStatus('');
-        }, 3000);
-    };
+    }
+  };
 
-    // Array of dog icons for the "Human check" section.
-    const dogIcons = Array.from({ length: 8 }, (_, i) => (
-        <span key={i} className="text-gray-600 text-3xl md:text-4xl">
-            🐾
-        </span>
-    ));
-
-    return (
-          <>
-           <section className="bg-[#c9d6df] py-24 md:py-32 flex items-center justify-center mt-70">
-      {/* The heading for the section.
-          The text size scales with the viewport width for responsiveness. */}
-      <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold text-[#000 ] text-center">
-        Free Rental Evaluation
-      </h2>
-    </section>
-        <div className="min-h-screen  p-4 md:p-8 flex items-center justify-center">
-            <div className="max-w-7xl mx-auto w-full bg-white rounded-xl  overflow-hidden lg:flex">
-                {/* Left side: Contact Information */}
-                <div className="flex flex-col lg:flex-row lg:gap-12 justify-center pt-49">
-          
-          {/* Address Section */}
-          <div className="flex-2 mb-8 lg:mb-0">
-            <div className="flex items-start">
-              <span className="text-[#000] text-3xl mr-4"><IoLocationOutline /></span>
+  return (
+    <>
+      <h1 className="text-5xl sm:text-5xl pt-27 text-center md:text-7xl lg:text-9xl font-extrabold bg-gray-100 text-gray-300">
+        Contact Us
+      </h1>
+      
+      <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
+        <div className="max-w-6xl w-full rounded-lg p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Left Section - Reach Out */}
+          <div className="flex flex-col space-y-6">
+            <h2 className="text-3xl font-bold text-gray-700 mb-4 border-b-2 border-red-500 pb-2">
+              Reach Out
+            </h2>
+            <div className="flex items-center space-x-3">
+              <span className="text-red-500">📞</span>
               <div>
-                <p className="font-semibold text-xl text-gray-800">Address</p>
-                <p className="text-gray-600 mt-2">80 S Geronimo St, Suite 6</p>
-                <p className="text-gray-600">Miramar Beach, FL 32550</p>
+                <p className="font-semibold">Phone</p>
+                <p>+91-8920800296</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              <span className="text-red-500">📧</span>
+              <div>
+                <p className="font-semibold">Emails & Support</p>
+                {/* <p>info.vcteamr@gmail.com</p> */}
+                <p>support@vcteam.in</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              <span className="text-red-500">📍</span>
+              <div>
+                <p className="font-semibold">Address</p>
+                <p>(HEAD OFFICE) OFFICE NO - T-04, 3RD FLOOR, C-124, C-BLOCK, SECTOR -02, NOIDA, UTTAR PRADESH-201301</p>
+              <p className='mt-4'>(BRANCH OFFICE) OFFICE No. 570F, 5th Floor, Block: D&E, CCC (Chandigarh City Center) VIP Road, Zirakpur, Punjab-  140603</p>
               </div>
             </div>
           </div>
 
-          {/* Phone Numbers Section */}
-          <div className="flex-2">
-            <div className="flex items-start">
-              <span className="text-[#000] text-3xl mr-4"><MdLocalPhone /></span>
-              <div>
-                <p className="font-semibold text-xl text-gray-800">Phone Numbers</p>
-                <div className="mt-2">
-                  <p className="text-gray-600">Office: (850) 837-1653</p>
-                  <p className="text-gray-600 mt-2">Toll-Free: (866) 369-0292</p>
-                </div>
+          {/* Right Section - General Form */}
+          <div className="flex flex-col">
+            <h2 className="text-3xl font-bold text-gray-700 mb-4 border-b-2 border-red-500 pb-2 text-center uppercase">
+              Inquiry Form
+            </h2>
+            <form  onSubmit={handleSubmit} className="flex flex-col space-y-4">
+              
+            
+              <input type="hidden" name="formType" value="General Form" />
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="YOUR NAME*"
+                  required
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+                <input
+                  type="tel"
+                  name="mobile"
+                  placeholder="MOB NO.*"
+                  required
+                  value={formData.mobile}
+                  onChange={handleChange}
+                  className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
               </div>
-            </div>
-          </div>
 
-        </div>
+              <input
+                type="email"
+                name="email"
+                placeholder="EMAIL ID*"
+                required
+                value={formData.email}
+                onChange={handleChange}
+                className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+              />
 
-                {/* Right side: Contact Form */}
-                <div className="lg:w-2/3 p-8 md:p-12">
-                    <form onSubmit={handleSubmit}>
-                        {/* Name fields */}
-                        <div className="mb-6">
-                            <label htmlFor="firstName" className="block text-gray-700 text-sm font-semibold mb-2">First Name</label>
-                            <input
-                                type="text"
-                                id="firstName"
-                                name="firstName"
-                                value={formData.firstName}
-                                onChange={handleChange}
-                                className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                                placeholder="First Name"
-                            />
-                        </div>
-                        <div className="mb-6">
-                            <label htmlFor="lastName" className="block text-gray-700 text-sm font-semibold mb-2">Last Name</label>
-                            <input
-                                type="text"
-                                id="lastName"
-                                name="lastName"
-                                value={formData.lastName}
-                                onChange={handleChange}
-                                className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                                placeholder="Last Name"
-                            />
-                        </div>
+              
+              <select
+                name="selectedService" 
+                required 
+                value={formData.selectedService}
+                onChange={handleChange} 
+                className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+              >
+                <option value="">TYPE OF SERVICES: *</option>
+                {servicesList.map((service, index) => (
+                  <option key={index} value={service}>{service}</option>
+                ))}
+              </select>
+              
 
-                        {/* Email field */}
-                        <div className="mb-6">
-                            <label htmlFor="email" className="block text-gray-700 text-sm font-semibold mb-2">Email</label>
-                            <input
-                                type="email"
-                                id="email"
-                                name="email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                                placeholder="Email Address"
-                            />
-                        </div>
+              <select
+                name="destination"
+                value={formData.destination}
+                onChange={handleChange}
+                className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+              >
+                <option value="">DESTINATION (all country list)</option>
+                {countries.map((country, index) => (
+                  <option key={index} value={country}>{country}</option>
+                ))}
+              </select>
 
-                        {/* Phone fields */}
-                        <div className="mb-6">
-                            <label htmlFor="mobilePhone" className="block text-gray-700 text-sm font-semibold mb-2">Mobile Phone</label>
-                            <input
-                                type="tel"
-                                id="mobilePhone"
-                                name="mobilePhone"
-                                value={formData.mobilePhone}
-                                onChange={handleChange}
-                                className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                                placeholder="Mobile Phone"
-                            />
-                        </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <input
+                  type="date"
+                  name="startDate"
+                  placeholder="START DATE"
+                  value={formData.startDate}
+                  onChange={handleChange}
+                  className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+                <input
+                  type="date"
+                  name="endDate"
+                  placeholder="END DATE"
+                  value={formData.endDate}
+                  onChange={handleChange}
+                  className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+              </div>
 
-                        {/* Address and Comments fields */}
-                        <div className="mb-6">
-                            <label htmlFor="homeAddress" className="block text-gray-700 text-sm font-semibold mb-2">Home Address</label>
-                            <input
-                                type="text"
-                                id="homeAddress"
-                                name="homeAddress"
-                                value={formData.homeAddress}
-                                onChange={handleChange}
-                                className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                                placeholder="Address"
-                            />
-                        </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <input
+                  type="number"
+                  name="adults"
+                  placeholder="NO OF PEOPLE (adults)"
+                  min="1"
+                  value={formData.adults}
+                  onChange={handleChange}
+                  className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+                <input
+                  type="number"
+                  name="children"
+                  placeholder="NO OF PEOPLE (child)"
+                  min="0"
+                  value={formData.children}
+                  onChange={handleChange}
+                  className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+              </div>
 
-                        <div className="mb-6">
-                            <label htmlFor="comments" className="block text-gray-700 text-sm font-semibold mb-2">Comments</label>
-                            <textarea
-                                id="comments"
-                                name="comments"
-                                value={formData.comments}
-                                onChange={handleChange}
-                                rows="4"
-                                className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 resize-none"
-                                placeholder="Comments"
-                            ></textarea>
-                        </div>
+              <select
+                name="hotelCategory"
+                value={formData.hotelCategory}
+                onChange={handleChange}
+                className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+              >
+                <option value="">HOTEL CATEGORY</option>
+                <option value="1 Star">1 Star</option>
+                <option value="2 Star">2 Star</option>
+                <option value="3 Star">3 Star</option>
+                <option value="4 Star">4 Star</option>
+                <option value="5 Star">5 Star</option>
+              </select>
 
-                        {/* "Human Check" section */}
-                        <div className="flex flex-col items-center justify-center text-center mt-12 mb-6">
-                            <p className="text-gray-700 text-base mb-2">Human check: how many dogs are below?</p>
-                            <div className="flex gap-2 mb-4">
-                                {dogIcons}
-                            </div>
-                            <select
-                                id="dogCount"
-                                name="dogCount"
-                                value={formData.dogCount}
-                                onChange={handleChange}
-                                className="w-24 p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                            >
-                                {Array.from({ length: dogIcons.length + 1 }, (_, i) => (
-                                    <option key={i} value={i}>{i}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        {/* Status message display */}
-                        {status && (
-                            <div className="text-center mt-4 text-sm font-medium text-cyan-600">
-                                {status}
-                            </div>
-                        )}
-                        
-                        {/* Submit button */}
-                        <div className="mt-8">
-                            <button
-                                type="submit"
-                                className="w-full py-3 rounded-full bg-cyan-700 text-white font-semibold hover:bg-cyan-800 transition-colors"
-                            >
-                                Submit
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <section className="bg-[#c9d6df] py-16 px-4 md:px-12 lg:px-24 text-center">
-      <div className="max-w-4xl mx-auto">
-        <h2 className="text-4xl font-bold text-gray-900 sm:text-5xl md:text-4xl mb-6">
-         Contact Gibson Beach Rentals
-        </h2>
-        <p className="text-gray-700 text-base md:text-lg leading-relaxed">
-        Gibson Beach Rentals wants you to experience the luxury of one of our beautiful vacation properties, located in the Destin, Miramar Beach, Florida panhandle area. We manage places to stay like vacation condos, townhomes, and villas in the most prestigious, luxurious resorts along the Emerald Coast. Choose from properties inside one of our beautiful complexes including: Beach Manor, Beachside I, Beachside II, Beachwalk Villas, Elation, Emerald Waters, Crystal Dunes, Silver Shells, Harbour Point, Market Street Inn, Summit, Augusta Village, Heron Walk, Luau II, North Shore, Pilot House, Tivoli, The Tides, or Westwinds. We have a little bit of everything to suit your needs.
-        </p>
-        <p className="text-gray-700 text-base md:text-lg leading-relaxed mt-4">
-       Gibson Beach Rentals wants you to experience the luxury of one of our beautiful vacation properties, located in the Destin, Miramar Beach, Florida panhandle area. We manage places to stay like vacation condos, townhomes, and villas in the most prestigious, luxurious resorts along the Emerald Coast. Choose from properties inside one of our beautiful complexes including: Beach Manor, Beachside I, Beachside II, Beachwalk Villas, Elation, Emerald Waters, Crystal Dunes, Silver Shells, Harbour Point, Market Street Inn, Summit, Augusta Village, Heron Walk, Luau II, North Shore, Pilot House, Tivoli, The Tides, or Westwinds. We have a little bit of everything to suit your needs.
-        </p>
-        <p className="text-gray-700 text-base md:text-lg leading-relaxed mt-4">We can also assist you if you have real estate inquiries or if you are interested in our property management services as an Owner yourself.</p>
-        <p className="text-gray-700 text-base md:text-lg leading-relaxed mt-4">Fill out the quick form below and a member of our team will be in touch soon!</p>
-      </div>
-    </section>
-    <div className="bg-gray-100 min-h-screen p-4 md:p-8 flex items-center justify-center">
-      <div className="max-w-7xl mx-auto w-full bg-white rounded-xl shadow-lg overflow-hidden p-8 md:p-12">
-        {/* Main content container with a responsive grid layout. */}
-        {/* On mobile, it's a single column (`flex-col`). On medium screens and up, it becomes two columns (`md:flex-row`). */}
-        <div className="flex flex-col md:flex-row md:items-start md:gap-8">
-          {/* Text content area */}
-          <div className="flex-1 order-2 md:order-1">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">About the Owners</h2>
-            <p className="text-gray-600 leading-relaxed mb-4">
-              ESTABLISHED IN 2003, by owners Larry and Joanna Gibson, GBR prides itself in providing the type of service that keeps owners and guests coming back for years to come. As vacation property owners themselves, the Gibsons couldn't find a company that delivered the level of service every owner and guest deserves.
-            </p>
-            <p className="text-gray-600 leading-relaxed mb-4">
-              In order to fill the void left by the other rental management companies in the area and to provide better rental experience for owners and guests, Larry and Joanna founded Gibson Beach Rentals bringing their special interest in vacation rentals to their guests and owners. To this day, Gibson Beach Rentals continues to be rewarded by clients who are looking to get more out of their management company.
-            </p>
-            <p className="text-gray-600 leading-relaxed mb-4">
-              Gibson Beach Rentals' units are located within the Panama City Beach, Destin, Miramar Beach-area's most popular properties.
-            </p>
-            <p className="text-gray-600 leading-relaxed font-semibold italic">
-              Let Gibson Beach Rentals help you enjoy your vacation on the beautiful Emerald Coast. worry less; relax more.
-            </p>
-          </div>
-          
-          {/* Image container */}
-          {/* The image is on top on mobile (`order-1`) and on the right on larger screens (`md:order-2`). */}
-          <div className="flex-none w-full md:w-1/3 flex justify-center items-start mb-8 md:mb-0 order-1 md:order-2">
-            <img 
-              className="w-full h-auto rounded-xl shadow-lg"
-              src="https://media.scurto.net/2044/Uploads/owners-244x300.png"
-              alt="Owners Larry and Joanna Gibson" 
-            />
+              <textarea
+                name="message"
+                placeholder="MESSAGE BOX"
+                rows="4"
+                value={formData.message}
+                onChange={handleChange}
+                className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+              ></textarea>
+              
+              <div className="flex justify-center">
+                <button
+                  type="submit"
+                  className="bg-red-500 text-white font-bold py-3 px-8 rounded-full hover:bg-red-600 transition-colors"
+                >
+                  Send
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
-    </div>
-        </>
-    );
+      
+      {/* Thank You Modal */}
+      {showThankYouModal && (
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg shadow-xl text-center max-w-sm w-full">
+            <div className="text-green-500 text-6xl mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold mb-2 text-gray-800">Thank you!</h2>
+            <p className="text-gray-600 mb-4">Your form has been submitted successfully.</p>
+            <p className="text-sm text-gray-500">You will be redirected to the homepage in 3 seconds...</p>
+          </div>
+        </div>
+      )}
+    </>
+  );
 };
 
-export default Contact;
+export default ContactForm;
